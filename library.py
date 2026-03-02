@@ -1,52 +1,54 @@
 import argparse
 
-books = ["Harry Potter", "1984", "The Hobbit"]
+my_books = ["Harry Potter", "1984", "The Hobbit"]
 
-def list_books():
-    if books:
-        print("Books:")
-        for book in books:
-            print("-", book)
+def show_books():
+    if len(my_books) == 0:
+        print("There are no books right now.")
+        return
+    
+    print("Here are the books:")
+    for b in my_books:
+        print(b)
+
+def add_new_book(book_name):
+    my_books.append(book_name)
+    print(book_name, "was added.")
+
+def borrow_one(book_name):
+    if book_name not in my_books:
+        print("Sorry, that book is not here.")
     else:
-        print("No books available.")
+        my_books.remove(book_name)
+        print("You borrowed", book_name)
 
-def add_book(name):
-    books.append(name)
-    print("Book added.")
+def return_one(book_name):
+    my_books.append(book_name)
+    print("You returned", book_name)
 
-def borrow_book(name):
-    if name in books:
-        books.remove(name)
-        print("Book borrowed.")
-    else:
-        print("Book not available.")
+parser = argparse.ArgumentParser()
+commands = parser.add_subparsers(dest="action")
 
-def return_book(name):
-    books.append(name)
-    print("Book returned.")
+commands.add_parser("list")
 
-parser = argparse.ArgumentParser(description="Library System")
-subparsers = parser.add_subparsers(dest="command")
+add_cmd = commands.add_parser("add")
+add_cmd.add_argument("book")
 
-subparsers.add_parser("list")
-add = subparsers.add_parser("add")
-add.add_argument("name")
+borrow_cmd = commands.add_parser("borrow")
+borrow_cmd.add_argument("book")
 
-borrow = subparsers.add_parser("borrow")
-borrow.add_argument("name")
+return_cmd = commands.add_parser("return")
+return_cmd.add_argument("book")
 
-ret = subparsers.add_parser("return")
-ret.add_argument("name")
+arguments = parser.parse_args()
 
-args = parser.parse_args()
-
-if args.command == "add":
-    add_book(args.name)
-elif args.command == "borrow":
-    borrow_book(args.name)
-elif args.command == "return":
-    return_book(args.name)
-elif args.command == "list":
-    list_books()
+if arguments.action == "add":
+    add_new_book(arguments.book)
+elif arguments.action == "borrow":
+    borrow_one(arguments.book)
+elif arguments.action == "return":
+    return_one(arguments.book)
+elif arguments.action == "list":
+    show_books()
 else:
-    parser.print_help()
+    print("Please enter a valid command.")
