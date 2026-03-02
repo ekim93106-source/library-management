@@ -8,11 +8,11 @@ class Item:
 
 
 class Book(Item):
-
-    def __init__(self, title, author):
+    def __init__(self, title, author, status="available"):
         super().__init__(title)
         self._author = author
-        self._status = "available"
+        self._status = status
+        self._reading_task = None
 
     @property
     def author(self):
@@ -30,6 +30,18 @@ class Book(Item):
         if self._status == "borrowed":
             self._status = "available"
 
+    def attach_task(self, task):
+        self._reading_task = task
+
+    def mark_completed(self):
+        self._status = "completed"
+
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "author": self.author,
+            "status": self.status
+        }
+
     def __str__(self):
         return f"{self.title} by {self.author} - {self.status}"
-    
