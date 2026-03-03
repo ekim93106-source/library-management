@@ -1,54 +1,96 @@
 import argparse
+from book import Book
+from task import Task
+from db import load_books, save_books
 
-my_books = ["Harry Potter", "1984", "The Hobbit"]
+books = load_books()
 
-def show_books():
-    if len(my_books) == 0:
-        print("There are no books right now.")
-        return
-    
-    print("Here are the books:")
-    for b in my_books:
-        print(b)
-
-def add_new_book(book_name):
-    my_books.append(book_name)
-    print(book_name, "was added.")
-
-def borrow_one(book_name):
-    if book_name not in my_books:
-        print("Sorry, that book is not here.")
+def list_books():
+    if not books:
+        print("No books available.")
     else:
-        my_books.remove(book_name)
-        print("You borrowed", book_name)
+        for book in books:
+            print(book)
 
-def return_one(book_name):
-    my_books.append(book_name)
-    print("You returned", book_name)
+def add_book(name):
+    book = Book(name)
+    books.append(book)
+    save_books(books)
+    print("Book added.")
 
-parser = argparse.ArgumentParser()
-commands = parser.add_subparsers(dest="action")
+def borrow_book(name):
+    for book in books:
+        if book.title == name:
+            book.borrow()
+            save_books(books)
+            print("Book borrowed.")
+            return
+    print("Book not found.")
 
-commands.add_parser("list")
+def return_book(name):
+    for book in books:
+        if book.title == name:
+            book.return_book()
+            save_books(books)
+            print("Book returned.")
+            return
+    print("Book not found.")
 
-add_cmd = commands.add_parser("add")
-add_cmd.add_argument("book")
+def add_task(name, task_title):
+    for book in books:
+        if book.title == name:
+            Task(task_title, book)
+            print("Reading task added.")
+            return
+    print("Book not found.")
 
-borrow_cmd = commands.add_parser("borrow")
-borrow_cmd.add_argument("book")
+def complete_task(name):
+    for book in books:
+        if book.title == name and book._reading_task:
+            book._reading_task.mark_complete()
+            save_books(books)
+            print("Reading completed.")
+            return
+    print("Task not found.")
 
-return_cmd = commands.add_parser("return")
-return_cmd.add_argument("book")
+def run():
+    parser = argparse.ArgumentParser(description="Library Management System")
+    subparsers = parser.add_subparsers(dest="command")
 
-arguments = parser.parse_args()
+    add_parser = subparsers.add_parser("add")
+    add_parser.add_argument("name")
 
-if arguments.action == "add":
-    add_new_book(arguments.book)
-elif arguments.action == "borrow":
-    borrow_one(arguments.book)
-elif arguments.action == "return":
-    return_one(arguments.book)
-elif arguments.action == "list":
-    show_books()
-else:
-    print("Please enter a valid command.")
+    borrow_parser = subparsers.add_parser("borrow")
+    borrow_parser.add_argument("name")
+
+    return_parser = subparsers.add_parser("return")
+    return_parser.add_argument("name")
+
+    subparsers.add_parser("list")
+
+    task_parser = subparsers.add_parser("addtask")
+    task_parser.add_argument("name")
+    task_parser.add_argument("task")
+
+    complete_parser = subparsers.add_parser("complete")
+    complete_parser.add_argument("name")
+
+    args = parser.parse_args()
+
+    if args.command == "add":
+        add_book(args.name)
+    elif args.command == "borrow":
+        borrow_book(args.name)
+    elif args.command == "return":
+        return_book(args.name)
+    elif args.command == "list":
+        list_books()
+    elif args.command == "addtask":
+        add_task(args.name, args.task)
+    elif args.command == "complete":
+        complete_task(args.name)
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    run()
