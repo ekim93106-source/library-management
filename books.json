@@ -1,0 +1,11 @@
+[
+    {
+        "title": "Harry Potter",
+        "author": "J.K Rowling",
+        "available": true,
+        "reading_task": {
+            "description": "Read 10 chapters",
+            "completed": true
+        }
+    }
+]
